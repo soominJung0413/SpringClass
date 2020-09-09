@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.bullutineBoard.mapper.PostMapper">
+	<resultMap id="boardResultMap"
+		type="www.study.com.bullutineBoard.model.BoardVO">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+	</resultMap>
+
+	<resultMap id="replyResultMap"
+		type="www.study.com.bullutineBoard.model.ReplyVO">
+		<id property="hierarchyId" column="hierarchy_id" />
+		<result property="content" column="content" />
+
+		<!-- 다른 Mapper.xml에서 정의된  resultMap을 활용하는 방법 --> 
+		<association  property="writer" columnPrefix="m_" resultMap="www.study.com.party.mapper.PartyMapper.partyResultMap"/>
+
+		<!-- 구분자 -->
+		<discriminator javaType="String" column="post_type">
+			<case value="POST" resultMap="postResultMap" />
+		</discriminator>
+	</resultMap>
+
+	<resultMap id="postResultMap"
+		type="www.study.com.bullutineBoard.model.PostVO" extends="replyResultMap">
+		<result property="title" column="title" />
+		<association property="board" columnPrefix="b_" resultMap="boardResultMap"/>
+	</resultMap>
+
+	<select id="getAll" resultMap="replyResultMap">
+		select p.*, m.id m_id, m.name m_name, m.birth_date m_birth_date, m.party_type m_party_type, m.gender m_gender, m.sales_tot m_sales_tot
+		  from t_post p
+		       left outer join t_party m on p.writer_id = m.id
+		 where p.post_type = 'POST'
+	</select>
+
+	<!-- Composite Pattern에 따른 개발 방법 -->
+	<select id="getAllReply" resultMap="replyResultMap">
+		select p.*, m.id m_id, m.name m_name, m.birth_date m_birth_date, m.party_type m_party_type, m.gender m_gender, m.sales_tot m_sales_tot
+		  from t_post p
+		       left outer join t_party m on p.writer_id = m.id
+		 where hierarchy_id like '1%'
+	</select>
+
+	<select id="findById" resultMap="replyResultMap">
+		select p.*, m.id m_id, m.name m_name, m.party_type m_party_type
+		  from t_post p
+		       left outer join t_party m on p.writer_id = m.id
+		 where p.hierarchy_id = #{hierarchyId}
+	</select>
+
+	<insert id="insertPost">
+		<selectKey keyProperty="hierarchyId" order="BEFORE" resultType="String">
+			select to62(seq4post.nextval) from dual
+		</selectKey>
+		insert into t_post (hierarchy_id, bb_id, writer_id, post_type, title, content)
+			values(#{hierarchyId}, #{board.id}, #{writer.id}, 'POST', #{title}, #{content})
+	</insert>
+
+	<insert id="insertReply">
+		<selectKey keyProperty="hierarchyId" order="BEFORE" resultType="String">
+			 select #{parent.hierarchyId} || #{hidDeli} || to62(seq4post.nextval) from dual
+		</selectKey>
+		insert into t_post(hierarchy_id, writer_id, content)
+			values(#{hierarchyId}, #{writer.id}, #{content})
+	</insert>
+
+	<update id="updatePost">
+		update t_post
+		   set content = #{content},
+		       title = #{title}
+		 where hierarchy_id = #{hierarchyId}
+	</update>
+</mapper>
