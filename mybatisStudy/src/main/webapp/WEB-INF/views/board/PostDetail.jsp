@@ -26,11 +26,19 @@
 				<button data-oper='list' class="btn btn-default">글 목록</button>
 			</div>
 			<!-- /.panel -->
+			
 		</div>
 		<!-- /.col-lg-12 -->
 	</div>
 </div>			
 <!-- /.row -->
+
+			<!-- hidden을 이용하여 요청 정보 관리하기 -->
+			<form id="operForm" action="/board/modify" method="get">
+				<input type="hidden" id="hid" name="hierarchyId" value="${post.hierarchyId}"></input> 
+				<input type="hidden" name='pageNo' value='${cri.pageNo}'> 
+				<input type="hidden" name='amount' value='${cri.amount}'>
+			</form>
 
 <%@ include file="../includes/footer.jsp"%>
 
@@ -41,13 +49,17 @@
 $(document).ready(function() {
 	// ./includes/PostInfo.jsp에 정의된 함수입니다.
 	setOperMode("readMode");
+	
+	var operForm = $("#operForm");
 
 	$("#btnModifyPost").on('click', function(e){
-		self.location = "/board/modify?hierarchyId=" + $(this).data('hierarchy_id');
+		operForm.submit();
 	});
 	
 	$("button[data-oper='list']").on("click", function(e) {
-		self.location = "/board/list";
+		operForm.find("#hid").remove();
+		operForm.attr("action","/board/list");
+		operForm.submit();
 	});
 });
 </script>

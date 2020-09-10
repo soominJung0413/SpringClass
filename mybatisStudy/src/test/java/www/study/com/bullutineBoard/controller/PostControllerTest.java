@@ -20,6 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
 import www.study.com.bullutineBoard.model.ReplyVO;
+import www.study.com.framework.model.Criteria;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -41,6 +42,8 @@ public class PostControllerTest {
 		try {
 			MockHttpServletRequestBuilder mockHttpServletRequestBuilder 
 				= MockMvcRequestBuilders.get("/board/list");
+						mockHttpServletRequestBuilder.param("amount", "10");
+						mockHttpServletRequestBuilder.param("pageNum","2");
 			ResultActions resultActions = mockMvc.perform(mockHttpServletRequestBuilder);
 			MvcResult mvcResult = resultActions.andReturn();
 			ModelAndView modelAndView = mvcResult.getModelAndView();

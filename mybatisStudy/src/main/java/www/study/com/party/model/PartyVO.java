@@ -11,7 +11,7 @@ import lombok.Data;
  * get~, set~ 함수가 있어야 함
  */
 @Data
-public class PartyVO {
+public abstract class PartyVO {
 	private int id;
 	private String name;
 	private Date birthDate;

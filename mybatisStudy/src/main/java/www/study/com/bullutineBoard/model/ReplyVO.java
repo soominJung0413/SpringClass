@@ -3,13 +3,14 @@ package www.study.com.bullutineBoard.model;
 import lombok.Data;
 import lombok.Getter;
 import www.study.com.party.model.PartyVO;
+import www.study.com.party.model.PersonVO;
 
 @Data
 public class ReplyVO {
 	private static final char HID_DELI = '-';
 	@Getter
 	private String hierarchyId;
-	private PartyVO writer;
+	private PersonVO writer;
 	@Getter
 	private String content;
 	
@@ -17,7 +18,7 @@ public class ReplyVO {
 	
 	public ReplyVO() {}
 
-	public ReplyVO(ReplyVO parent, PartyVO writer, String content) {
+	public ReplyVO(ReplyVO parent, PersonVO writer, String content) {
 		this.parent = parent;
 		this.writer = writer;
 		this.content = content;
@@ -42,5 +43,10 @@ public class ReplyVO {
 	@Override
 	public String toString() {
 		return "ReplyVO [hierarchyId=" + hierarchyId + ", writer=" + writer + ", content=" + content + "]";
+	}
+	
+	
+	protected String toSimpleString() {
+		return "hierarchyId=" + hierarchyId;
 	}
 }

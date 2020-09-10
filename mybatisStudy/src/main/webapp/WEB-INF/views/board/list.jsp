@@ -35,12 +35,40 @@
 					<tbody>
 						<c:forEach items="${list}" var="post">
 						<tr>
-							<td><a href="/board/findPostById?hierarchyId=${post.hierarchyId}">${post.title}</a></td>
+							<td><a class="jumpToDetail" href="${post.hierarchyId}">${post.title}</a></td>
 							<td>${post.writer.name}</td>
 						</tr>
 						</c:forEach>
 					</tbody>
 				</table>
+				<div class='justify-content-center'> <!-- Page Jump 용 anchor -->
+					<ul class='pagination'>
+						<c:if test="${pageMaker.prev}">
+							<li class="paginate_button previous">
+								<a href="${pageMaker.startPage - 1}">Previous</a>
+							</li>
+						</c:if>
+
+						<c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
+							<!-- active : 현재 선택된 것 지정. 더이상 클릭하지 않아도 됩니다. -->
+							<li class="paginate_button ${pageMaker.pageNo == num ? "active":"" }">
+								<a href="${num}">${num}</a>
+							</li>
+						</c:forEach>
+
+						<c:if test="${pageMaker.next}">
+							<li class="paginate_button next">
+								<a href="${pageMaker.endPage + 1}">Next</a>
+							</li>
+						</c:if>
+					</ul>
+					<!-- pagination 처리 시에는 검색 조건에 대한 변화가 없어야합니다. 이에 기억하고 있다가 재요청하는 스타일로 개발합니다. 
+							검색 이후 검색 문자열 변경하고 페이지를 누른다면 검색 문자열 변경 이전으로 지속되어야 합니다. -->
+						<form id='actionForm' action='/board/list' method='get'>
+							<input type="hidden" name='pageNo' value='${pageMaker.pageNo}'> 
+							<input type="hidden" name='amount' value='${pageMaker.amount}'>
+						</form>
+				</div> <!-- Page Jump 용 anchor -->
 			</div>
 		</div>
 	</div>
@@ -70,7 +98,7 @@
 
 
 
-
+	
 <%@include file="../includes/footer.jsp"%>
 
 <script type="text/javascript">
@@ -79,8 +107,7 @@ $(document).ready(function() {
 
 	checkModal(result);
 
-	// 상태(모달 창 띄울 필요 없음 상태) 하나 생성
-	history.replaceState({}, null, null);
+	
 
 	function checkModal(result) {
 		if (result === '' || history.state) {
@@ -89,12 +116,32 @@ $(document).ready(function() {
 		$(".modal-body").html("게시글 " + result + " 번이 등록되었습니다.");
 
 		$("#myModal").modal("show");
+		
+		// 상태(모달 창 띄울 필요 없음 상태) 하나 생성
+		history.replaceState({}, null, null);
 	}
 
 	$("#btnInsertPostPage").on('click', function(e){
 		self.location = "/board/register";
 	});
-
+	
+	var actionForm = $("#actionForm");
+	
+	$(".pagination a").on("click",function(e){
+		e.preventDefault();
+		var pageNo = actionForm.find("input[name='pageNo']");
+		var jumpTarget = $(this).attr("href");
+		pageNo.val(jumpTarget);
+		actionForm.submit();
+	});
+	
+	$(".jumpToDetail").on("click",function(e){
+		e.preventDefault();
+		var hierarchyId = $(this).attr("href");
+		actionForm.append("<input type='hidden' name='hierarchyId' value='"+hierarchyId+"'>" );
+		actionForm.attr("action","/board/findPostById");
+		actionForm.submit();
+	});
 });
 </script>
 

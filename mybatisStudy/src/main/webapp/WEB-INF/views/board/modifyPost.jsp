@@ -24,11 +24,15 @@
 
 			<!-- /.panel-heading -->
 			<div class="panel-body">
-				<form id="postInfoForm" role="form" action="/board/update" method="post">
+				<form id="postInfoForm" role="form" action="/board/modify" method="post">
 					<%@ include file="./includes/PostInfo.jsp"%>
-
+					
 					<button type="submit" id='btnModify' class="btn btn-default">글 수정</button>
+					<button type="submit" data-oper="remove" class="btn btn-danger">글 삭제</button>
 					<button type="submit" id='btnList' class="btn btn-info">글 목록</button>
+					
+					<input type="hidden" name='pageNo' value='${cri.pageNo}'> 
+					<input type="hidden" name='amount' value='${cri.amount}'>
 				</form>
 			</div>
 			<!-- /.panel -->
@@ -55,7 +59,23 @@
 			e.preventDefault();
 
 			formObj.attr('action', "/board/list").attr("method", "get");
+			
+			//요청정보 최소화를 하면 성능에서 이득을 본다!
+			var pageNoInput = $("input:hidden['name=pageNo']").clone();
+			var amountInput = $("input:hidden['name=amount']").clone();
+			
+			formObj.empty();
+			formObj.append(pageNoInput);
+			formObj.append(amountInput);
 
+			formObj.submit();
+		});
+		
+		$("button[data-oper='remove']").on("click",function(e){
+			e.preventDefault();
+			
+			formObj.attr('action', "/board/remove").attr("method", "post");
+			
 			formObj.submit();
 		});
 	});
