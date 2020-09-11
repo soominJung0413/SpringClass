@@ -31,8 +31,7 @@
 					<button type="submit" data-oper="remove" class="btn btn-danger">글 삭제</button>
 					<button type="submit" id='btnList' class="btn btn-info">글 목록</button>
 					
-					<input type="hidden" name='pageNo' value='${cri.pageNo}'> 
-					<input type="hidden" name='amount' value='${cri.amount}'>
+					${cri.makeHiddenHTMLTags()}
 				</form>
 			</div>
 			<!-- /.panel -->
@@ -48,35 +47,43 @@
 		// ./includes/PostInfo.jsp에 정의된 함수입니다.
 		setOperMode("updateMode");
 
-		var formObj = $("#postInfoForm");
-
+		var postInfoForm = $("#postInfoForm");
+		
+		//사용자의 정보 수정을 완료하고 이를 저장처리 요청함
 		$('#btnModify').on("click", function(e) {
 			e.preventDefault();
-			formObj.submit();
+			postInfoForm.submit();
 		});
 		
+		//수정을 하지 않고 목록으로 돌아갈때 입니다.
 		$('#btnList').on("click", function(e) {
 			e.preventDefault();
 
-			formObj.attr('action', "/board/list").attr("method", "get");
+			postInfoForm.attr('action', "/board/list").attr("method", "get");
 			
 			//요청정보 최소화를 하면 성능에서 이득을 본다!
-			var pageNoInput = $("input:hidden['name=pageNo']").clone();
-			var amountInput = $("input:hidden['name=amount']").clone();
+			var pageNoInput = $("input:hidden[name='pageNo']").clone();
+			var amountInput = $("input:hidden[name='amount']").clone();
+			var typeInput = $("input:hidden[name='type']").clone();
+			var keywordInput = $("input:hidden[name='keyword']").clone();
 			
-			formObj.empty();
-			formObj.append(pageNoInput);
-			formObj.append(amountInput);
-
-			formObj.submit();
+			postInfoForm.empty();
+			postInfoForm.append(pageNoInput);
+			postInfoForm.append(amountInput);
+			postInfoForm.append(typeInput);
+			postInfoForm.append(keywordInput);
+			
+			
+			  postInfoForm.submit();   
 		});
 		
+		//삭제 처리합니다.
 		$("button[data-oper='remove']").on("click",function(e){
 			e.preventDefault();
 			
-			formObj.attr('action', "/board/remove").attr("method", "post");
+			postInfoForm.attr('action', "/board/remove").attr("method", "post");
 			
-			formObj.submit();
+			postInfoForm.submit();
 		});
 	});
 </script>

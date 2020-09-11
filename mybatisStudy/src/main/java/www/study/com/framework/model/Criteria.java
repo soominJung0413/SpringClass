@@ -6,8 +6,8 @@ import lombok.Data;
 public class Criteria {
 	private static final float PAGING_BTN_COUNT = 10.0f;
 	
-	private int pageNo;
-	private int amount;
+	protected int pageNo;
+	protected int amount;
 	
 	private int startPage, endPage, total;
 	
@@ -15,6 +15,12 @@ public class Criteria {
 	
 	public Criteria() {
 		this(1,10);
+	}
+	
+	public Criteria(Criteria other,int tot) {//넘겨야하는 객체안에서 변경사항을 관리하는 방법, 객체 안의 생성자에서 생성자의 변경점을 관리함.
+		this.pageNo = other.pageNo;
+		this.amount = other.amount;
+		calc(tot);
 	}
 
 	public Criteria(int pageNo, int amount) {

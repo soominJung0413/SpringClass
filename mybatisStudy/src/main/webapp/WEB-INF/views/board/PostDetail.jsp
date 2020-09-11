@@ -36,8 +36,7 @@
 			<!-- hidden을 이용하여 요청 정보 관리하기 -->
 			<form id="operForm" action="/board/modify" method="get">
 				<input type="hidden" id="hid" name="hierarchyId" value="${post.hierarchyId}"></input> 
-				<input type="hidden" name='pageNo' value='${cri.pageNo}'> 
-				<input type="hidden" name='amount' value='${cri.amount}'>
+				${cri.makeHiddenHTMLTags()}
 			</form>
 
 <%@ include file="../includes/footer.jsp"%>
@@ -52,6 +51,7 @@ $(document).ready(function() {
 	
 	var operForm = $("#operForm");
 
+	//수정 페이지로 전환
 	$("#btnModifyPost").on('click', function(e){
 		operForm.submit();
 	});
