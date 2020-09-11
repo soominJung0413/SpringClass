@@ -47,28 +47,45 @@
 		 where hierarchy_id like '1%'
 	</select>
 	
+	<sql id="criteria">
+		<trim prefix="AND (" suffix=")" prefixOverrides="OR">
+			<foreach collection="typeArr" item="type" separator=" " >
+				<trim prefix="OR">
+					<choose>
+						<when test="type =='T'.toString()">
+							title like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'C'.toString()">
+							content like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
 	<select id="countTotalPost" resultType="java.lang.Integer">
-	<![CDATA[
 		select count(*)
 			 from t_post p
 		 		where p.post_type = 'POST'
-	]]>
+		 		<include refid="criteria"/>
 	</select>
 	
 	<select id="getPostByPaging" resultMap="replyResultMap">
-	<![CDATA[
 	select p.*, m.id m_id, m.name m_name, m.birth_date m_birth_date, m.party_type m_party_type, m.gender m_gender, m.sales_tot m_sales_tot
 		from(
 			select *
 				from (
 					select rownum rn, p.*
 					 from t_post p
-					 where p.post_type = 'POST'
-					 	and rownum <= #{pageNo} * #{amount}
-				 	  ) p
+					 where p.post_type = 'POST'		 
+				<include refid="criteria"/>
+		<![CDATA[
+			 	and rownum <= #{pageNo} * #{amount}
+		 	    ) p
 		 	  where rn > (#{pageNo} -1) * #{amount}
-	 	    ) p
-	 	    	left outer join t_party m on p.writer_id = m.id
+	 	      ) p
+ 	    	  left outer join t_party m on p.writer_id = m.id
 	]]>
 	</select>
 
