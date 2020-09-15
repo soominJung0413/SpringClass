@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.party.mapper.PartyMapper">
+	<resultMap id="partyResultMap"
+		type="www.study.com.party.model.PartyVO">
+		<!-- 마이바티스가 Db로부터 확보한 정보의 중복을 걸러주는 식별자 -->
+		<constructor>
+			<idArg column="login_id" javaType="String"/>
+			<idArg column="pwd" javaType="String"/>
+		</constructor>
+
+		<result property="name" column="name" />
+		<result property="birthDate" column="birth_date" />
+		<result property="joinDate" column="join_date" />
+		
+		<!-- 구분자 -->
+		<discriminator javaType="String" column="party_type">
+			<case value="PERSON" resultMap="personResultMap" />
+			<case value="ORGANIZATION" resultMap="organizationResultMap" />
+		</discriminator>
+	</resultMap>
+
+	<resultMap id="personResultMap"
+		type="www.study.com.party.model.PersonVO" extends="partyResultMap">
+		<result property="gender" column="gender" />
+	</resultMap>
+	<resultMap id="organizationResultMap"
+		type="www.study.com.party.model.OrganizationVO" extends="partyResultMap">
+	</resultMap>
+
+	<!-- public PartyVO findPartyByLoginId(@Param("loginId")String loginId); -->
+	<select id="findPartyByLoginId" resultMap="partyResultMap">
+		select * 
+		  from t_party
+		    where login_id = #{loginId}
+	</select>
+	
+</mapper>
