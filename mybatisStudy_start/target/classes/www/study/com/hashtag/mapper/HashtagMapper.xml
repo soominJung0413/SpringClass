@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="www.study.com.hashtag.mapper.HashtagMapper">
+  
+  	<resultMap type="www.study.com.hashtag.model.HashtagVO" id="hashtagResultMap">
+  	<constructor>
+			<idArg column="id" javaType="Integer"/>
+			<idArg column="tag" javaType="String"/>
+			<idArg column="DESCRIPT" javaType="String" jdbcType="VARCHAR"/>
+		</constructor>
+  	</resultMap>
+  	
+  	<!-- public List<HashtagVO> findExists(List<String> tagList); -->
+  	<select id="findExists" resultMap="hashtagResultMap">
+  		select * from t_hashtag
+  			where tag in 
+  			<foreach collection="listTag" item="tagObj" separator="," open="(" close=")">
+  				#{tagObj.tag}
+  			</foreach>
+  	</select>
+  	
+  	<!-- public void createTag(HashtagVO obj); -->
+  	<insert id="createTag">
+  		<selectKey keyProperty="id" order="BEFORE" resultType="Integer">
+  			select seq4hashtag.nextval from dual
+  		</selectKey>
+  		
+  		insert into t_hashtag(id, tag, descript) values
+  			(#{id}, #{tag}, #{discript, jdbcType=VARCHAR})
+  	</insert>
+  	
+  	<insert id="createMappingPostTag">
+  		INSERT ALL
+		<foreach item="tag" collection="listTag" separator=" ">
+			INTO m_post2tag(post_id, tag_id)
+			values (#{mapId}, #{tag.id})
+		</foreach>
+		SELECT * FROM DUAL
+  	</insert>
+  
+  </mapper>
