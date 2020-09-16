@@ -1,5 +1,7 @@
 package www.study.com.party.mapper;
 
+import java.util.Arrays;
+
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +17,7 @@ import www.study.com.party.model.PartyVO;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MapperTest {
+public class PartyMapperTest {
 	
 	@Autowired
 	private PartyMapper partyMapper;
@@ -34,6 +36,18 @@ public class MapperTest {
 		}
 	}
 	
-
+	@Test
+	public void test_ab_사용자를연락처까지함께아이디로찾아내기() {
+		System.out.println("\n사용자를연락처까지함께아이디로찾아내기()");
+		//Method Signiture
+		try {
+			PartyVO party = partyMapper.findPartyWithContactPointByLoginId("a");
+			
+			
+			System.out.println("사용자 + 연락처 : "+party);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }

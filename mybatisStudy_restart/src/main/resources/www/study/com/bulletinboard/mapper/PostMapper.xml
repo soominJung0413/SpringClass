@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.bulletinboard.mapper.PostMapper">
+	<!-- public PostVO findPostWithWriter(@Param("postId")String postId); -->
+	<resultMap type="www.study.com.bulletinboard.model.ReplyVO" id="replyResultMap">
+		<constructor>
+			<idArg column="hierarchy_id" javaType="String"/>
+			<idArg column="content" javaType="String"/>
+		</constructor>
+		<!-- 맵퍼 풀네임.리절트맵 이름 -->
+		<association property="writer" columnPrefix="m_" resultMap="www.study.com.party.mapper.PartyMapper.partyResultMap"/>
+		<discriminator column="post_type" javaType="String">
+			<case value="POST">
+				<association property="board" resultMap="postResultMap"/>
+			</case>
+		</discriminator>
+	</resultMap>
+	
+	<resultMap type="www.study.com.bulletinboard.model.PostVO" id="postResultMap" extends="replyResultMap">
+		<result property="title" column="title"/>
+		<association property="board" resultMap="bulletinBoardResultMap"/>
+	</resultMap>
+	
+	<resultMap type="www.study.com.bulletinboard.model.BulletinBoardVO" id="bulletinBoardResultMap">
+		<constructor>
+			<idArg column="id" javaType="Long"/>
+			<idArg column="name" javaType="String"/>
+		</constructor>
+	</resultMap>
+	
+</mapper>

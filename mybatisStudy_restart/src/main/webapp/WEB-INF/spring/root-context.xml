@@ -29,6 +29,8 @@
 	</bean>
 
 	<mybatis-spring:scan base-package="www.study.com.party.mapper"/>
+	<mybatis-spring:scan base-package="www.study.com.bulletinboard.mapper"/>
 	
+	<tx:annotation-driven transaction-manager="transactionManager" mode="proxy" proxy-target-class="true"/>
 	
 </beans>

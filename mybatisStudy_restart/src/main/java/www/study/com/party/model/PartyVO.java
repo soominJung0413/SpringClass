@@ -31,37 +31,11 @@ public abstract class PartyVO {
 		return "PartyVO [loginId=" + loginId + ", pwd=" + pwd + ", name=" + name + ", birthDate=" + birthDate
 				+ ", joinDate=" + joinDate + ", listContactPoint=" + listContactPoint + "]";
 	}
-
-	public String getName() {
-		return name;
+	
+	protected String toStringPropOnly() {
+		return "loginId=" + loginId + ", pwd=" + pwd + ", name=" + name + ", listContactPoint=" + listContactPoint;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Date getBirthDate() {
-		return birthDate;
-	}
-
-	public void setBirthDate(Date birthDate) {
-		this.birthDate = birthDate;
-	}
-
-	public Date getJoinDate() {
-		return joinDate;
-	}
-
-	public void setJoinDate(Date joinDate) {
-		this.joinDate = joinDate;
-	}
-
-	public List<ContactPointVO> getListContactPoint() {
-		return listContactPoint;
-	}
-
-	public void setListContactPoint(List<ContactPointVO> listContactPoint) {
-		this.listContactPoint = listContactPoint;
-	}
+	
 
 }

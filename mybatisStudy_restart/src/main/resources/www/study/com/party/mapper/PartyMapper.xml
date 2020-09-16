@@ -18,12 +18,15 @@
 		<result property="birthDate" column="birth_date" />
 		<result property="joinDate" column="join_date" />
 		
+		<collection property="listContactPoint" resultMap="contactPointResultMap" />
+		
 		<!-- 구분자 -->
 		<discriminator javaType="String" column="party_type">
 			<case value="PERSON" resultMap="personResultMap" />
 			<case value="ORGANIZATION" resultMap="organizationResultMap" />
 		</discriminator>
 	</resultMap>
+	
 
 	<resultMap id="personResultMap"
 		type="www.study.com.party.model.PersonVO" extends="partyResultMap">
@@ -32,11 +35,24 @@
 	<resultMap id="organizationResultMap"
 		type="www.study.com.party.model.OrganizationVO" extends="partyResultMap">
 	</resultMap>
+	<resultMap id="contactPointResultMap" type="www.study.com.party.model.ContactPointVO">
+		<id property="typeName" column="type_name"/>
+		<result property="contactPoint" column="contact_point"/>
+	</resultMap>
 
 	<!-- public PartyVO findPartyByLoginId(@Param("loginId")String loginId); -->
 	<select id="findPartyByLoginId" resultMap="partyResultMap">
 		select * 
 		  from t_party
+		    where login_id = #{loginId}
+	</select>
+	
+	<!-- public PartyVO findPartyWithContactPointByLoginId(@Param("loginId")String loginId); -->
+	<select id="findPartyWithContactPointByLoginId" resultMap="partyResultMap">
+			select * 
+			  from t_party p
+			  left outer join t_contact_point cp
+			  	on p.login_id = cp.party_id
 		    where login_id = #{loginId}
 	</select>
 	

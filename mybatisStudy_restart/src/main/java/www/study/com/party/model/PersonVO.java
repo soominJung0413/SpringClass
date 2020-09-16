@@ -21,6 +21,12 @@ public class PersonVO extends PartyVO {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
+
+	@Override
+	public String toString() {
+		return "PersonVO ["+super.toStringPropOnly()+", gender=" + gender + "]";
+	}
+	
 	
 	
 }
