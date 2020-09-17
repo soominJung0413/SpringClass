@@ -9,11 +9,8 @@
 	<resultMap id="partyResultMap"
 		type="www.study.com.party.model.PartyVO">
 		<!-- 마이바티스가 Db로부터 확보한 정보의 중복을 걸러주는 식별자 -->
-		<constructor>
-			<idArg column="login_id" javaType="String"/>
-			<idArg column="pwd" javaType="String"/>
-		</constructor>
-
+		<id column="login_id" javaType="String" property="loginId"/> 
+		<result column="pwd" javaType="String" property="pwd"/>
 		<result property="name" column="name" />
 		<result property="birthDate" column="birth_date" />
 		<result property="joinDate" column="join_date" />
@@ -55,5 +52,21 @@
 			  	on p.login_id = cp.party_id
 		    where login_id = #{loginId}
 	</select>
+	
+	<!-- public PostVO secessionParty(@Param("postId") String postId); -->
+	<update id="secessionParty">
+		  update t_party
+         set pwd = null,
+            birth_date = null,
+            join_date = null,
+            gender = null,
+            is_alive = false
+      where login_id = #{loginId}
+	</update>
+	
+	<delete id="deleteContactPointById">
+		delete from t_contact_point
+      where party_id = #{loginId}
+	</delete>
 	
 </mapper>
