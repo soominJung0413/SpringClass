@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.bulletinboard.mapper.BulletinBoardMapper">
+	<resultMap id="bulletinBoardResultMap"
+		type="www.study.com.bulletinboard.model.BulletinBoardVO">
+	<constructor>
+		<idArg column="id" javaType="long" />
+		 <arg column="name" javaType="String"/> 
+	</constructor>
+<!-- 
+		<id property="id" column="id" />
+ -->		
+		<!-- <result property="name" column="name" /> -->
+	</resultMap>	
+</mapper>
+
+
+
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.party.mapper.PartyMapper">
+	<resultMap id="partyResultMap"
+		type="www.study.com.party.model.PartyVO">
+		<!-- id : 마이바티스가 DB로부터 확보한 정보의 중복됨을 걸러서 유일하게 만들기 위함 -->
+		<!-- constructor :  -->
+		<constructor>
+			<idArg column="login_id" javaType="String" />
+			<idArg column="pwd" javaType="String" />
+		</constructor>
+		
+		<result property="name" column="name" />
+		<result property="birthDate" column="birth_date" />
+		<result property="joinDate" column="join_date" />
+		
+		<collection property="listContactPoint" resultMap="contactPointResultMap"></collection>
+		
+		<!-- 구분자 -->
+		<discriminator javaType="String" column="party_type">
+			<case value="PERSON" resultMap="personResultMap" />
+			<case value="ORGANIZATION" resultMap="organizationResultMap" />
+		</discriminator>
+	</resultMap>
+
+
+	<resultMap id="personResultMap"
+		type="www.study.com.party.model.PersonVO" extends="partyResultMap">
+		<result property="gender" column="gender" />
+	</resultMap>
+	<resultMap id="organizationResultMap"
+		type="www.study.com.party.model.OrganizationVO" extends="partyResultMap">
+	</resultMap>
+
+	<resultMap id="contactPointResultMap"
+		type="www.study.com.party.model.ContactPointVO">
+		<!-- id : 마이바티스가 DB로부터 확보한 정보의 중복됨을 걸러서 유일하게 만들기 위함 -->
+		<id property="typeName" column="type_name" />
+		<result property="contactPoint" column="contact_point" />
+	</resultMap>
+
+
+	<!-- 	public PartyVO findPartyByLoginId(@Param("loginId") String loginIdtesttest);  -->
+	 <select id="findPartyByLoginId" resultMap="partyResultMap">
+	 	select * 
+	 	  from t_party
+	 	 where login_id = #{loginId}
+	 </select>
+	 
+	 <!-- 	public PartyVO findPartyWithContactPointByLoginId(@Param("loginId") String loginId);  -->
+	 <select id="findPartyWithContactPointByLoginId" resultMap="partyResultMap">
+	 	select * 
+	 	  from t_party p
+	 	  	   left outer join t_contact_point cp on p.login_id = cp.party_id
+	 	 where login_id = #{loginId}
+	 </select>
+	
+	<!--    public int secessionParty(@Param("loginId") String loginId); -->
+	<update id="secessionParty">
+		update t_party
+		   set pwd = null, 
+		   	   birth_date = null, 
+		   	   join_date = null, 
+		   	   gender = null,
+		   	   is_alive = false
+		 where login_id = #{loginId};
+		 
+		delete from t_contact_point  
+		 where party_id = #{loginId};
+	</update>
+	
+</mapper>
+
+
+
+

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.bulletinboard.mapper.PostMapper">
+	<resultMap id="replyResultMap"
+		type="www.study.com.bulletinboard.model.ReplyVO">
+ 		<!-- <constructor>
+			<idArg column="hierarchy_id" javaType="String" jdbcType="VARCHAR"/>
+		</constructor> -->
+<!-- id : namespace에서 식별자로 구동. Master 2 Master 와의 association 관계까지 
+함께 읽어들일 때는 namespace를 분리하세요!
+Master Table 당 하나의 Mapper를 만들어야합니다.
+ -->		
+		<id property="hierarchyId" column="hierarchy_id" javaType="String" />
+		<result property="content" column="content" />
+		<result property="regDate" column="reg_date" />
+		<result property="updateDate" column="update_date" />
+	
+		<!-- 다른 Mapper.xml에서 정의된  resultMap을 활용하는 방법 --> <!-- 1:N -->
+		<association  property="writer" columnPrefix="m_" resultMap="www.study.com.party.mapper.PartyMapper.partyResultMap"/>
+
+		<!-- 구분자 -->
+		<discriminator javaType="String" column="post_type">
+			<case value="POST" resultMap="postResultMap" />
+		</discriminator>
+	</resultMap>
+
+	<resultMap id="postResultMap"
+		type="www.study.com.bulletinboard.model.PostVO" extends="replyResultMap">
+		<result property="title" column="title" />
+	</resultMap>
+
+	 <!-- 	public PostVO findPostWithWriter(@Param("postId") String postId); -->
+	<select id="findPostWithWriter" resultMap="replyResultMap">
+		select p.*, 
+				m.login_id m_login_id, m.pwd m_pwd, m.name m_name, m.birth_date m_birth_date, m.join_date m_join_date, 
+				m.party_type m_party_type, m.gender m_gender, m.is_alive m_is_alive
+		  from t_post p,t_party m
+		 where p.hierarchy_id = #{postId}
+		   and p.writer_id = m.login_id
+	</select>
+	
+	
+     <!-- public List<PostVO> searchPost(@Param("arrUserSearch") String[] arrUserSearch); -->	
+	<select id="searchPost" resultMap="replyResultMap">
+		select p.*,m.login_id m_login_id, m.pwd m_pwd,m.party_type m_party_type<!-- 컨스트럭터 디스크리미네이터는 필수여부라 무조건 컬럼으로 뺸다 -->
+		  from m_post2tag mpt, t_post p, t_party m
+		 where mpt.tag_id in (
+			select id
+			  from t_hashtag 
+			 where tag in 
+			 		<foreach collection="arrUserSearch" item="searchWord" open="(" separator="," close=")">
+			 		    #{searchWord}
+			 		</foreach>
+	         ) 
+		and mpt.post_id = p.hierarchy_id	 
+		and p.writer_id = m.login_id
+	</select>
+	
+</mapper>
+
+
+
+
