@@ -3,10 +3,11 @@ package www.study.com.party.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor	//화면에서 입력한 정보를 바탕으로 HTTP를 통하여 서버로 넘어올때 활용됩니다.
+@NoArgsConstructor // 화면에서 입력한 정보를 바탕으로 HTTP를 통하여 서버로 넘어올때 활용됩니다.
+@Getter
 public class PersonVO extends PartyVO {
-	
-	private String gender;		//성별
+
+	private String gender; // 성별
 
 	public PersonVO(String loginId, String pwd) {
 		super(loginId, pwd);
@@ -16,7 +17,5 @@ public class PersonVO extends PartyVO {
 	public String toString() {
 		return "PersonVO [" + toStringPropOnly() + ", gender=" + gender + "]";
 	}
-	
-	
-	
+
 }

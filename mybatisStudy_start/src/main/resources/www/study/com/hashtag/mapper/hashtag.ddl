@@ -8,11 +8,18 @@ drop table t_hashtag;
 --id, tag, descript
 create table t_hashtag (
 	id				number(10),
+	aid				number(10),--분류
+	eid				number(10),--소유
 	tag			varchar2(50),
 	descript varchar(1000),
 	primary key(id)--동음이의어 문제로 tag단어는 PK는 불가함
 );
 create index idx_tag on t_hashtag(tag, id);--검색을 위해서 인덱스를 추가해줌
+
+create table t_Rhashtag (
+	fid				number(10),
+	sid				number(10),--분류
+);
 
 --게시글에 등재된 핵심단어
 create table m_post2tag (

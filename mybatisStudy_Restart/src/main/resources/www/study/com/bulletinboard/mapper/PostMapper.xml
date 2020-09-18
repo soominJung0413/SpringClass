@@ -8,14 +8,18 @@
 <mapper namespace="www.study.com.bulletinboard.mapper.PostMapper">
 	<resultMap id="replyResultMap"
 		type="www.study.com.bulletinboard.model.ReplyVO">
- 		<!-- <constructor>
+ 		<!-- 
+ 		<constructor>
 			<idArg column="hierarchy_id" javaType="String" jdbcType="VARCHAR"/>
-		</constructor> -->
+		</constructor>
+		 -->
 <!-- id : namespace에서 식별자로 구동. Master 2 Master 와의 association 관계까지 
 함께 읽어들일 때는 namespace를 분리하세요!
 Master Table 당 하나의 Mapper를 만들어야합니다.
  -->		
-		<id property="hierarchyId" column="hierarchy_id" javaType="String" />
+ 		<constructor>
+		<idArg  column="hierarchy_id" javaType="String" />
+		</constructor>
 		<result property="content" column="content" />
 		<result property="regDate" column="reg_date" />
 		<result property="updateDate" column="update_date" />
@@ -44,22 +48,60 @@ Master Table 당 하나의 Mapper를 만들어야합니다.
 		   and p.writer_id = m.login_id
 	</select>
 	
+	<sql id="searchByTag">
+		from m_post2tag mpt, t_post p
+				 where mpt.tag_id in (
+					select id
+					  from t_hashtag 
+					 where tag in 
+					 		<foreach collection="criteria.getArrKeyword()" item="searchWord" open="(" separator="," close=")">
+					 		    #{searchWord}
+					 		</foreach>
+			         ) 
+				and mpt.post_id = p.hierarchy_id	
+	</sql>
 	
-     <!-- public List<PostVO> searchPost(@Param("arrUserSearch") String[] arrUserSearch); -->	
-	<select id="searchPost" resultMap="replyResultMap">
-		select p.*,m.login_id m_login_id, m.pwd m_pwd,m.party_type m_party_type<!-- 컨스트럭터 디스크리미네이터는 필수여부라 무조건 컬럼으로 뺸다 -->
-		  from m_post2tag mpt, t_post p, t_party m
-		 where mpt.tag_id in (
-			select id
-			  from t_hashtag 
-			 where tag in 
-			 		<foreach collection="arrUserSearch" item="searchWord" open="(" separator="," close=")">
-			 		    #{searchWord}
-			 		</foreach>
-	         ) 
-		and mpt.post_id = p.hierarchy_id	 
-		and p.writer_id = m.login_id
+	<!-- public List<ReplyVO> getPostByPaging(@Param("criteria") Criteria criteria); -->
+	 <select id="getPostByPaging" resultMap="replyResultMap">
+	 	select	p.*, m.login_id as m_login_id , m.pwd as m_pwd, m.name as m_name ,m.party_type as m_party_type
+	 		from 
+	 		<if test="criteria.getArrKeyword().length == 0">
+	 			(select p.*
+				  from t_post p
+					limit #{criteria.AMOUNT_PER_PAGE} offset (#{criteria.pageNo}-1) *  #{criteria.AMOUNT_PER_PAGE}
+					) p
+	 		</if>
+	 		<if test="criteria.getArrKeyword().length > 0">
+				(select p.*
+				  <include refid="searchByTag"></include>
+					limit #{criteria.AMOUNT_PER_PAGE} offset (#{criteria.pageNo}-1) *  #{criteria.AMOUNT_PER_PAGE}
+					) p
+	 		</if>
+	 			 , t_party m 
+			where p.writer_id = m.login_id
 	</select>
+	
+	<!-- public Long countTotalPost(@Param("criteria") Criteria criteria); -->
+	 <select id="countTotalPost" resultType="Long">
+	 		<if test="criteria.getArrKeyword().length == 0">
+	 			select count(*)
+				  from t_post p
+	 		</if>
+	 		<if test="criteria.getArrKeyword().length > 0">
+				select count(*)
+				   <include refid="searchByTag"></include>
+	 		</if>
+	</select>
+	
+	<!-- public int createPost(@Param("post") PostVO post); -->
+	<insert id="createPost">
+		<selectKey keyProperty="post.hierarchyId" order="BEFORE" resultType="String">
+			select * from to62(nextval('seq4reply') )
+		</selectKey>
+	insert into t_post (hierarchy_id, writer_id, content, post_type, bb_id, title) values (
+	#{post.hierarchyId} , #{post.writer.loginId} , #{post.content} ,'POST', #{post.boardId}, #{post.title}
+	)
+	</insert>
 	
 </mapper>
 

@@ -3,18 +3,33 @@ package www.study.com.bulletinboard.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
 import lombok.Setter;
+import www.study.com.party.model.PartyVO;
 import www.study.com.search.model.HashtagVO;
 
+@Setter
+@Getter
 public class PostVO extends ReplyVO {
-	@Setter
 	private String title; // 제목
+	private long boardId; // 게시판
 
-	// @Getter
 	private List<String> listHashtagString = new ArrayList<String>(); // "봄 여름 가을"
 
-	public PostVO(String hierarchyId, String content) {
-		super(hierarchyId, content);
+	public PostVO(int boardId, String title, String content, PartyVO writer) {
+		super(content, writer);
+		this.boardId = boardId;
+		this.title = title;
+	}
+
+	/**
+	 * Called by Mybatis
+	 * 
+	 * @param loginId
+	 * @param pwd
+	 */
+	public PostVO(String hierarchyId) {
+		super(hierarchyId);
 	}
 
 	/* 주어진 정보로 모든 필요한 것이 제공이되면 이를 받는 곳에서 처리 */

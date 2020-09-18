@@ -1,3 +1,6 @@
+create sequence seq4reply;
+drop sequence seq4reply;
+
 drop t_post;
 drop t_bulletin_board;
 

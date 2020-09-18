@@ -10,12 +10,17 @@ import org.apache.ibatis.annotations.Param;
 
 import www.study.com.bulletinboard.model.PostVO;
 import www.study.com.bulletinboard.model.ReplyVO;
+import www.study.com.framework.model.Criteria;
 
 public interface PostMapper {
+	// List , Single Read , Create , Update, Delete
+
+	public List<ReplyVO> getPostByPaging(@Param("criteria") Criteria criteria);
+
+	public Long countTotalPost(@Param("criteria") Criteria criteria);
+
 	public PostVO findPostWithWriter(@Param("postId") String postId);
 
-	//public List<PostVO> searchPost(@Param("arrUserSearch") String[] arrUserSearch);
-	public List<ReplyVO> searchPost(@Param("arrUserSearch") String[] arrUserSearch);
+	public int createPost(@Param("post") PostVO post);
 
 }
-
