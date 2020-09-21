@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.bulletinboard.mapper.PostMapper">
+	<resultMap id="replyResultMap"
+		type="www.study.com.bulletinboard.model.ReplyVO">
+ 		<!-- 
+		<id property="hierarchyId" column="hierarchy_id" javaType="String" />
+		-->
+<!-- id : namespace에서 식별자로 구동. Master 2 Master 와의 association 관계까지 
+함께 읽어들일 때는 namespace를 분리하세요!
+Master Table 당 하나의 Mapper를 만들어야합니다.
+ -->		
+ 		<constructor>
+			<idArg column="hierarchy_id" javaType="String" jdbcType="VARCHAR"/>
+		</constructor> 
+		<result property="content" column="content" />
+		<result property="regDate" column="reg_date" />
+		<result property="updateDate" column="update_date" />
+	
+
+		<!-- 다른 Mapper.xml에서 정의된  resultMap을 활용하는 방법 --> <!-- 1:N -->
+		<!-- association 되어있는 것은 결과집합에서 필수적으로 요구되는 듯합니다. -->
+		<association  property="writer" columnPrefix="m_" resultMap="www.study.com.party.mapper.PartyMapper.partyResultMap">
+		</association>
+
+		<!-- 구분자 -->
+		<discriminator javaType="String" column="post_type">
+			<case value="POST" resultMap="postResultMap" />
+		</discriminator>
+
+	</resultMap>
+
+	<resultMap id="postResultMap"
+		type="www.study.com.bulletinboard.model.PostVO" extends="replyResultMap">
+		<result property="title" column="title" />
+
+		<collection property="listHashtag" columnPrefix="tag_" resultMap="www.study.com.search.mapper.HashtagMapper.hashtagResultMap"></collection>
+	</resultMap>
+
+	 <!-- 	public PostVO findPostWithWriter(@Param("postId") String postId); -->
+	<select id="findPostWithWriter" resultMap="replyResultMap">
+		 select p.*, 
+				m.login_id m_login_id, m.pwd m_pwd, m.name m_name, m.birth_date m_birth_date, m.join_date m_join_date, 
+				m.party_type m_party_type, m.gender m_gender, m.is_alive m_is_alive,
+				t.id tag_id, t.tag tag_tag
+		   from t_post p inner join t_party m on p.writer_id = m.login_id
+		  		left outer join m_post2tag pt on p.hierarchy_id = pt.post_id
+		  		inner join t_hashtag t on pt.tag_id= t.id
+		 where p.hierarchy_id = #{postId}
+	</select>
+
+	<sql id="searchByTag">
+		  from m_post2tag mpt, t_post p
+		 where mpt.tag_id in (
+		  	   select id
+			    from t_hashtag 
+			   where tag in 
+			 		<foreach collection="criteria.getArrKeyword()" item="searchWord" open="(" separator="," close=")">
+			 		    #{searchWord}
+			 		</foreach>
+	           ) 
+		   and mpt.post_id = p.hierarchy_id
+	</sql>	
+	
+	<!-- 	public List<ReplyVO> getPostByPaging(@Param("criteria") Criteria criteria); -->
+	<select id="getPostByPaging" resultMap="replyResultMap">
+		select p.*, m.login_id m_login_id, m.pwd m_pwd, m.name m_name, m.party_type m_party_type
+		  from 
+		  <if test="criteria.getArrKeyword().length == 0">
+			  (select p.*
+				 from t_post p
+				order by p.hierarchy_id desc
+				 LIMIT #{criteria.AMOUNT_PER_PAGE} OFFSET (#{criteria.pageNo} - 1) * #{criteria.AMOUNT_PER_PAGE}
+				) p
+		  </if>
+		  <if test="criteria.getArrKeyword().length != 0">
+			  (select p.*
+				  	<include refid="searchByTag"></include>
+				  	order by p.hierarchy_id desc
+					 LIMIT #{criteria.AMOUNT_PER_PAGE} OFFSET (#{criteria.pageNo} - 1) * #{criteria.AMOUNT_PER_PAGE}
+					) p
+		  </if>
+			   , t_party m
+		 where p.writer_id = m.login_id
+	</select>
+	<!-- public long countTotalPost(@Param("criteria") Criteria criteria); -->
+	<select id="countTotalPost" resultType="long">
+		  <if test="criteria.getArrKeyword().length == 0">
+			  select count(*)
+				  from t_post p
+		  </if>
+		  <if test="criteria.getArrKeyword().length != 0">
+			  select count(p.*)
+			  	<include refid="searchByTag"></include>
+		  </if>
+	</select>
+	
+	<!-- public int createPost(@Param("post") PostVO post); -->
+	<insert id="createPost">
+		<selectKey keyProperty="post.hierarchyId" order="BEFORE" resultType="String">
+			select * from to62(nextval('seq4reply'))
+		</selectKey>
+		insert into t_post(hierarchy_id, writer_id, content, post_type, bb_id, title)
+		values(#{post.hierarchyId}, #{post.writer.loginId}, #{post.content}, 'POST', #{post.boardId}, #{post.title})		
+	</insert>
+	
+	<!-- public int updatePost(@Param("post") PostVO post); -->
+	<update id="updatePost">
+		update t_post
+		   set title = #{post.title},
+		       content = #{post.content},
+		       update_date = current_timestamp
+		 where hierarchy_id = #{post.hierarchyId}
+	</update>
+	
+	<!-- public int deletePost(@Param("hierarchyId") String hierarchyId); -->
+	<delete id="deletePost">
+		delete from t_post
+		 where hierarchy_id = #{hierarchyId}
+	</delete>
+</mapper>
+
+
+
+

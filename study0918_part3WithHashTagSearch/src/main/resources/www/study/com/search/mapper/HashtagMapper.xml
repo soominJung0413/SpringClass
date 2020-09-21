@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- association : 1:N에서 N쪽의 정보를 조회할 때 1쪽의 정보도 함께 읽을 것임 -->
+
+<mapper namespace="www.study.com.search.mapper.HashtagMapper">
+	<resultMap id="hashtagResultMap"
+		type="www.study.com.search.model.HashtagVO">
+		<id property="id" column="id" />
+		<result property="tag" column="tag" />
+		<result property="descript" column="descript" />
+	</resultMap>
+
+	<!-- public List<HashtagVO> findExist(@Param("listHashtag") List<HashtagVO> 
+		listHashtag); -->
+	<select id="findExist" resultMap="hashtagResultMap">
+		select *
+		from t_hashtag
+		where tag in
+		<foreach collection="listHashtag" item="tagObj" open="("
+			separator="," close=")">
+			#{tagObj.tag, jdbcType=VARCHAR}
+		</foreach>
+	</select>
+
+
+	<!-- public int createHashtag(@Param("tagObj") HashtagVO tag); -->
+	<insert id="createHashtag">
+		<selectKey keyProperty="tagObj.id" order="BEFORE" resultType="long">
+			select nextval('seq4hashtag')
+		</selectKey>
+		insert into t_hashtag(id, tag, descript)
+		values(#{tagObj.id}, #{tagObj.tag, jdbcType=VARCHAR}, #{tagObj.descript, jdbcType=VARCHAR})
+	</insert>
+
+	<!-- public void createMapping2Post(@Param("hierarchyId") String hierarchyId, 
+		@Param("listHashtag") List<HashtagVO> listHashtag); -->
+	<insert id="createMapping2Post">
+		INSERT INTO m_post2tag (post_id, tag_id)
+		VALUES
+		<foreach collection="listHashtag" item="tagObj" separator=", ">
+			(#{hierarchyId}, #{tagObj.id, jdbcType=BIGINT})
+		</foreach>
+	</insert>
+
+	<!-- public void clearMapping2Post(@Param("hierarchyId") String hierarchyId); -->
+	<delete id="clearMapping2Post">
+		delete from m_post2tag where post_id = #{hierarchyId}
+	</delete>
+</mapper>
+
+
+
+
